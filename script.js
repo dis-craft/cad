@@ -1,4 +1,3 @@
-
 const getBasePath = () => {
   
   if (window.location.hostname === 'dis-craft.github.io') {
@@ -8,19 +7,28 @@ const getBasePath = () => {
 };
 
 const basePath = getBasePath();
+console.log('Base path:', basePath);
 
 // Dynamically load files for a selected set
 function loadSetFiles(setName) {
+  console.log('Loading files for set:', setName);
   const fileListDiv = document.getElementById("fileList");
+  if (!fileListDiv) {
+    console.error('Could not find fileList element');
+    return;
+  }
+  
   fileListDiv.innerHTML = ""; // Clear previous files
-  for (let i = 1; i <= 5; i++) {https://github.com/dis-craft/cad
+  for (let i = 1; i <= 5; i++) {
     const filePath = `${basePath}${setName}/file${i}.pdf`;
+    console.log('Adding file path:', filePath);
     const fileCheckbox = `
       <div class="pdf-item">
         <input type="checkbox" value="${filePath}"> File ${i}
       </div>`;
     fileListDiv.innerHTML += fileCheckbox;
   }
+  console.log('Final fileList HTML:', fileListDiv.innerHTML);
 }
 
 async function generateCombinedPDF() {
@@ -29,6 +37,8 @@ async function generateCombinedPDF() {
     const name = document.getElementById("userName").value.trim();
     const usn = document.getElementById("userUSN").value.trim();
     const section = document.getElementById("userSection").value.trim();
+
+    console.log('User inputs:', name, usn, section);
 
     // Check if Name and USN are within the limit of 25 characters
     if (name.length > 25 || usn.length > 25) {
@@ -46,6 +56,8 @@ async function generateCombinedPDF() {
       checkbox => checkbox.value
     );
 
+    console.log('Selected files:', selectedFiles);
+
     if (selectedFiles.length === 0) {
       alert("Please select at least one file.");
       return;
@@ -57,6 +69,7 @@ async function generateCombinedPDF() {
 
     for (const fileUrl of selectedFiles) {
       try {
+        console.log('Processing file:', fileUrl);
         const response = await fetch(fileUrl, {
           method: 'GET',
           mode: 'cors', // Enable CORS
@@ -73,10 +86,14 @@ async function generateCombinedPDF() {
         const pdfBytes = await response.arrayBuffer();
         const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
 
+        console.log('Loaded PDF document:', pdfDoc);
+
         // Copy pages and add grid to each page
         const pages = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
         pages.forEach(page => {
           const { width, height } = page.getSize();
+
+          console.log('Page size:', width, height);
 
           // Grid dimensions and position
           const gridWidth = 150;
