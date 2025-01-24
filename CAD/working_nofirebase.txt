@@ -38,18 +38,15 @@
       width: 100%;
       padding: 8px;
       margin-bottom: 15px;
-      border: 1px solid #ccc;
       border-radius: 4px;
+      border: 1px solid #ccc;
     }
-
     .pdf-set {
       margin-bottom: 20px;
     }
-
     .pdf-item {
       margin-left: 20px;
     }
-
     button {
       background-color: #4CAF50;
       color: white;
