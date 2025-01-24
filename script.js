@@ -9,8 +9,8 @@ function getBasePath() {
 const basePath = getBasePath();
 console.log('Base path:', basePath);
 
-// Function to load files for a selected set
-function loadSetFiles(setName) {
+// Make functions globally accessible
+window.loadSetFiles = function(setName) {
   console.log('Loading files for set:', setName);
   const fileListDiv = document.getElementById("fileList");
   if (!fileListDiv) {
@@ -29,10 +29,9 @@ function loadSetFiles(setName) {
     fileListDiv.innerHTML += fileCheckbox;
   }
   console.log('Final fileList HTML:', fileListDiv.innerHTML);
-}
+};
 
-// Function to generate combined PDF
-async function generateCombinedPDF() {
+window.generateCombinedPDF = async function() {
   try {
     const name = document.getElementById("userName").value.trim();
     const usn = document.getElementById("userUSN").value.trim();
@@ -150,4 +149,5 @@ async function generateCombinedPDF() {
     console.error('Error generating PDF:', error);
     alert(`An error occurred while generating the PDF: ${error.message}\nPlease try again or contact support if the issue persists.`);
   }
-}
+};
+
