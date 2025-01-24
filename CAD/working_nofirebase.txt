@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF Merger with Custom Details</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+    }
+
+    header {
+      background-color: #4CAF50;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
+    main {
+      max-width: 800px;
+      margin: 20px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin: 10px 0 5px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .pdf-set {
+      margin-bottom: 20px;
+    }
+
+    .pdf-item {
+      margin-left: 20px;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    #fileSelection {
+      margin-top: 20px;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 14px;
+      color: #666;
+    }
+
+    /* Responsiveness */
+    @media (max-width: 768px) {
+      main {
+        margin: 10px;
+        padding: 15px;
+      }
+
+      label {
+        font-size: 14px;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>PDF Merger Tool</h1>
+  </header>
+
+  <main>
+    <h2>Enter Your Details</h2>
+
+    <label for="userName">Name:</label>
+    <input type="text" id="userName" placeholder="Enter your name">
+
+    <label for="userUSN">USN:</label>
+    <input type="text" id="userUSN" placeholder="Enter your USN">
+
+    <label for="userSection">Section:</label>
+    <input type="text" id="userSection" placeholder="Enter your Section">
+
+    <h2>Select a Set</h2>
+    <div id="setSelection">
+      <div class="pdf-set">
+        <input type="radio" name="set" value="set1" onchange="loadSetFiles('set1')"> ISOMETRIC PROJECTION
+      </div>
+      <div class="pdf-set">
+        <input type="radio" name="set" value="set2" onchange="loadSetFiles('set2')"> PROJECTION OF POINTS
+      </div>
+      <div class="pdf-set">
+        <input type="radio" name="set" value="set3" onchange="loadSetFiles('set3')"> PROJECTION OF LINES
+      </div>
+      <div class="pdf-set">
+        <input type="radio" name="set" value="set4" onchange="loadSetFiles('set4')"> PROJECTION OF SOLIDS
+      </div>
+      <div class="pdf-set">
+        <input type="radio" name="set" value="set5" onchange="loadSetFiles('set5')"> DEVELOPMENT OF LATERAL SURFACES
+      </div>
+    </div>
+
+    <div id="fileSelection">
+      <h3>Files in Selected Set:</h3>
+      <div id="fileList">Please select a set to view its files.</div>
+    </div>
+
+    <button onclick="generateCombinedPDF()">Download Combined PDF</button>
+  </main>
+
+  <footer>
+    &copy; 2025 PDF Merger Tool. All rights reserved.
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+  <script>
+    const basePath = '/pdfs/';
+
+    // Dynamically load files for a selected set
+    function loadSetFiles(setName) {
+      const fileListDiv = document.getElementById("fileList");
+      fileListDiv.innerHTML = ""; // Clear previous files
+      for (let i = 1; i <= 5; i++) {
+        const filePath = `${basePath}${setName}/file${i}.pdf`;
+        const fileCheckbox = `
+          <div class="pdf-item">
+            <input type="checkbox" value="${filePath}"> File ${i}
+          </div>`;
+        fileListDiv.innerHTML += fileCheckbox;
+      }
+    }
+
+    async function generateCombinedPDF() {
+      // Get user inputs
+      const name = document.getElementById("userName").value.trim();
+      const usn = document.getElementById("userUSN").value.trim();
+      const section = document.getElementById("userSection").value.trim();
+
+      if (!name || !usn || !section) {
+        alert("Please fill in all fields (Name, USN, Section).");
+        return;
+      }
+
+      // Get selected files
+      const selectedFiles = Array.from(document.querySelectorAll("#fileList input[type=checkbox]:checked")).map(
+        checkbox => checkbox.value
+      );
+
+      if (selectedFiles.length === 0) {
+        alert("Please select at least one file.");
+        return;
+      }
+
+      // Create a new PDF document
+      const mergedPdf = await PDFLib.PDFDocument.create();
+
+      // Process each selected file
+      for (const fileUrl of selectedFiles) {
+        try {
+          // Fetch and load the PDF
+          const pdfBytes = await fetch(fileUrl).then(res => res.arrayBuffer());
+          const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
+
+          // Copy pages and add grid to each page
+          const pages = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
+          pages.forEach(page => {
+            const { width, height } = page.getSize();
+
+            // Grid dimensions and position
+            const gridWidth = 150;
+            const gridHeight = 60;
+            const gridX = width - gridWidth - 10; // Right edge
+            const gridY = 20; // Bottom edge
+
+            // Draw grid above SECTION (for USN)
+            page.drawRectangle({
+              x: gridX,
+              y: gridY + 40, // Position above SECTION
+              width: gridWidth,
+              height: 20,
+              borderColor: PDFLib.rgb(0, 0, 0),
+              borderWidth: 2,
+            });
+
+            // Draw grid below NAME (for Name and USN)
+            page.drawRectangle({
+              x: gridX,
+              y: gridY + 60, // Position below NAME
+              width: gridWidth,
+              height: 20,
+              borderColor: PDFLib.rgb(0, 0, 0),
+              borderWidth: 2,
+            });
+
+            // Draw grid for SECTION
+            page.drawRectangle({
+              x: gridX,
+              y: gridY + 20, // Position below the first grid
+              width: gridWidth,
+              height: 20,
+              borderColor: PDFLib.rgb(0, 0, 0),
+              borderWidth: 2,
+            });
+
+            // Add labels and user data with "SECTION" in quotes
+            page.drawText(`NAME: ${name}`, { x: gridX + 5, y: gridY + 65, size: 10 });
+            page.drawText(`USN: ${usn}`, { x: gridX + 5, y: gridY + 45, size: 10 });
+            page.drawText(`SECTION: "${section}"`, { x: gridX + 5, y: gridY + 25, size: 10 });
+
+            mergedPdf.addPage(page);
+          });
+        } catch (error) {
+          console.error(`Error processing file: ${fileUrl}`, error);
+        }
+      }
+
+      // Save and download the merged PDF
+      const pdfBytes = await mergedPdf.save();
+      const blob = new Blob([pdfBytes], { type: "application/pdf" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "CombinedPDF.pdf";
+      link.click();
+    }
+  </script>
+</body>
+</html>
