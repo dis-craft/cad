@@ -3,94 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
   <title>CAD TOOL</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f9f9f9;
-    }
-
-    header {
-      background-color: #4CAF50;
-      color: white;
-      padding: 20px;
-      text-align: center;
-    }
-
-    main {
-      max-width: 800px;
-      margin: 20px auto;
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    label {
-      font-weight: bold;
-      display: block;
-      margin: 10px 0 5px;
-    }
-
-    input[type="text"] {
-      width: 100%;
-      padding: 8px;
-      margin-bottom: 15px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-
-    .pdf-set {
-      margin-bottom: 20px;
-    }
-
-    .pdf-item {
-      margin-left: 20px;
-    }
-
-    button {
-      background-color: #4CAF50;
-      color: white;
-      padding: 10px 15px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-
-    button:hover {
-      background-color: #45a049;
-    }
-
-    #fileSelection {
-      margin-top: 20px;
-    }
-
-    footer {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 14px;
-      color: #666;
-    }
-
-    /* Responsiveness */
-    @media (max-width: 768px) {
-      main {
-        margin: 10px;
-        padding: 15px;
-      }
-
-      label {
-        font-size: 14px;
-      }
-
-      button {
-        width: 100%;
-      }
-    }
-  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 </head>
 <body>
   <header>
@@ -140,7 +55,6 @@
     &copy; 2025 CAD TOOL. All rights reserved.
   </footer>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
   <script>
     const basePath = '/pdfs/';
 
@@ -185,13 +99,11 @@
         return;
       }
 
-      // Create a new PDF document
+      // Creating a new PDF file.
       const mergedPdf = await PDFLib.PDFDocument.create();
 
-      // Process each selected file
       for (const fileUrl of selectedFiles) {
         try {
-          // Fetch and load the PDF
           const pdfBytes = await fetch(fileUrl).then(res => res.arrayBuffer());
           const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
 
@@ -236,7 +148,7 @@
               borderWidth: 2,
             });
 
-            // Add labels and user data with "SECTION" in quotes
+            // Adding labels and user data with "SECTION" in quotes...
             page.drawText(`NAME: ${name}`, { x: gridX + 5, y: gridY + 65, size: 10 });
             page.drawText(`USN: ${usn}`, { x: gridX + 5, y: gridY + 45, size: 10 });
             page.drawText(`SECTION: "${section}"`, { x: gridX + 5, y: gridY + 25, size: 10 });
@@ -248,7 +160,7 @@
         }
       }
 
-      // Save and download the merged PDF
+      // Saving nd downloading the pdf
       const pdfBytes = await mergedPdf.save();
       const blob = new Blob([pdfBytes], { type: "application/pdf" });
       const link = document.createElement("a");
@@ -259,3 +171,21 @@
   </script>
 </body>
 </html>
+
+
+/*
+  firebase log feature of who downloaded: 
+  // Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyBSbonwVE3PPXIIrSrvrB75u2AQ_B_Tni4",
+  authDomain: "discraft-c1c41.firebaseapp.com",
+  databaseURL: "https://discraft-c1c41-default-rtdb.firebaseio.com",
+  projectId: "discraft-c1c41",
+  storageBucket: "discraft-c1c41.appspot.com",
+  messagingSenderId: "525620150766",
+  appId: "1:525620150766:web:a426e68d206c68764aceff",
+  measurementId: "G-2TRNRYRX5E"
+};
+
+
+*/
