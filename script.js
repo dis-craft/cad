@@ -173,6 +173,45 @@ window.previewCombinedPDF = async function() {
       const pages = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
       pages.forEach(page => {
         mergedPdf.addPage(page);
+
+        const { width, height } = page.getSize();
+        const gridWidth = 150;
+        const gridHeight = 60;
+        const gridX = width - gridWidth - 10;
+        const gridY = 20;
+
+        // Draw grids
+        page.drawRectangle({
+          x: gridX,
+          y: gridY + 60,
+          width: gridWidth,
+          height: 20,
+          borderColor: PDFLib.rgb(0, 0, 0),
+          borderWidth: 2,
+        });
+
+        page.drawRectangle({
+          x: gridX,
+          y: gridY + 40,
+          width: gridWidth,
+          height: 20,
+          borderColor: PDFLib.rgb(0, 0, 0),
+          borderWidth: 2,
+        });
+
+        page.drawRectangle({
+          x: gridX,
+          y: gridY + 20,
+          width: gridWidth,
+          height: 20,
+          borderColor: PDFLib.rgb(0, 0, 0),
+          borderWidth: 2,
+        });
+
+        // Add text
+        page.drawText(`NAME: ${name}`, { x: gridX + 5, y: gridY + 65, size: 10 });
+        page.drawText(`USN: ${usn}`, { x: gridX + 5, y: gridY + 45, size: 10 });
+        page.drawText(`SECTION: "${section}"`, { x: gridX + 5, y: gridY + 25, size: 10 });
       });
     }
 
