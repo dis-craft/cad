@@ -208,7 +208,8 @@ window.previewCombinedPDF = async function() {
           borderWidth: 2,
         });
 
-        // Add text
+        // Add user information
+        console.log('Drawing user info:', { name, usn, section });
         page.drawText(`NAME: ${name}`, { x: gridX + 5, y: gridY + 65, size: 10 });
         page.drawText(`USN: ${usn}`, { x: gridX + 5, y: gridY + 45, size: 10 });
         page.drawText(`SECTION: "${section}"`, { x: gridX + 5, y: gridY + 25, size: 10 });
