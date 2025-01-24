@@ -151,3 +151,38 @@ window.generateCombinedPDF = async function() {
   }
 };
 
+window.previewCombinedPDF = async function() {
+  try {
+    const name = document.getElementById("userName").value.trim();
+    const usn = document.getElementById("userUSN").value.trim();
+    const section = document.getElementById("userSection").value.trim();
+
+    const selectedFiles = Array.from(document.querySelectorAll("#fileList input[type=checkbox]:checked"))
+      .map(checkbox => checkbox.value);
+
+    if (selectedFiles.length === 0) {
+      alert("Please select at least one file.");
+      return;
+    }
+
+    const mergedPdf = await PDFLib.PDFDocument.create();
+    for (const fileUrl of selectedFiles) {
+      const response = await fetch(fileUrl);
+      const pdfBytes = await response.arrayBuffer();
+      const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
+      const pages = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
+      pages.forEach(page => {
+        mergedPdf.addPage(page);
+      });
+    }
+
+    const pdfBytes = await mergedPdf.save();
+    const blob = new Blob([pdfBytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    window.open(url);
+  } catch (error) {
+    console.error('Error generating preview PDF:', error);
+    alert('An error occurred while generating the preview PDF.');
+  }
+};
+
