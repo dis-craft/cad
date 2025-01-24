@@ -1,15 +1,15 @@
-const getBasePath = () => {
-  
+// Base path configuration
+function getBasePath() {
   if (window.location.hostname === 'dis-craft.github.io') {
     return '/cad/pdfs/';
   }
   return './pdfs/';
-};
+}
 
 const basePath = getBasePath();
 console.log('Base path:', basePath);
 
-// Dynamically load files for a selected set
+// Function to load files for a selected set
 function loadSetFiles(setName) {
   console.log('Loading files for set:', setName);
   const fileListDiv = document.getElementById("fileList");
@@ -31,16 +31,15 @@ function loadSetFiles(setName) {
   console.log('Final fileList HTML:', fileListDiv.innerHTML);
 }
 
+// Function to generate combined PDF
 async function generateCombinedPDF() {
   try {
-    // Get user inputs
     const name = document.getElementById("userName").value.trim();
     const usn = document.getElementById("userUSN").value.trim();
     const section = document.getElementById("userSection").value.trim();
 
-    console.log('User inputs:', name, usn, section);
+    console.log('User inputs:', { name, usn, section });
 
-    // Check if Name and USN are within the limit of 25 characters
     if (name.length > 25 || usn.length > 25) {
       alert("Name and USN must be 25 characters or less.");
       return;
@@ -51,10 +50,8 @@ async function generateCombinedPDF() {
       return;
     }
 
-    // Get selected files
-    const selectedFiles = Array.from(document.querySelectorAll("#fileList input[type=checkbox]:checked")).map(
-      checkbox => checkbox.value
-    );
+    const selectedFiles = Array.from(document.querySelectorAll("#fileList input[type=checkbox]:checked"))
+      .map(checkbox => checkbox.value);
 
     console.log('Selected files:', selectedFiles);
 
@@ -63,7 +60,6 @@ async function generateCombinedPDF() {
       return;
     }
 
-    // Creating a new PDF file.
     const mergedPdf = await PDFLib.PDFDocument.create();
     let successCount = 0;
 
@@ -72,8 +68,8 @@ async function generateCombinedPDF() {
         console.log('Processing file:', fileUrl);
         const response = await fetch(fileUrl, {
           method: 'GET',
-          mode: 'cors', // Enable CORS
-          cache: 'no-cache', // Disable caching
+          mode: 'cors',
+          cache: 'no-cache',
           headers: {
             'Accept': 'application/pdf'
           }
@@ -85,23 +81,19 @@ async function generateCombinedPDF() {
 
         const pdfBytes = await response.arrayBuffer();
         const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
+        console.log('Successfully loaded PDF:', fileUrl);
 
-        console.log('Loaded PDF document:', pdfDoc);
-
-        // Copy pages and add grid to each page
         const pages = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
         pages.forEach(page => {
           const { width, height } = page.getSize();
+          console.log('Processing page with dimensions:', { width, height });
 
-          console.log('Page size:', width, height);
-
-          // Grid dimensions and position
           const gridWidth = 150;
           const gridHeight = 60;
           const gridX = width - gridWidth - 10;
           const gridY = 20;
 
-          // Draw grid for NAME
+          // Draw grids
           page.drawRectangle({
             x: gridX,
             y: gridY + 60,
@@ -111,7 +103,6 @@ async function generateCombinedPDF() {
             borderWidth: 2,
           });
 
-          // Draw grid for USN
           page.drawRectangle({
             x: gridX,
             y: gridY + 40,
@@ -121,7 +112,6 @@ async function generateCombinedPDF() {
             borderWidth: 2,
           });
 
-          // Draw grid for SECTION
           page.drawRectangle({
             x: gridX,
             y: gridY + 20,
@@ -131,7 +121,7 @@ async function generateCombinedPDF() {
             borderWidth: 2,
           });
 
-          // Adding labels and user data
+          // Add text
           page.drawText(`NAME: ${name}`, { x: gridX + 5, y: gridY + 65, size: 10 });
           page.drawText(`USN: ${usn}`, { x: gridX + 5, y: gridY + 45, size: 10 });
           page.drawText(`SECTION: "${section}"`, { x: gridX + 5, y: gridY + 25, size: 10 });
@@ -150,7 +140,6 @@ async function generateCombinedPDF() {
       throw new Error('No PDFs were successfully processed');
     }
 
-    // Saving and downloading the pdf
     const pdfBytes = await mergedPdf.save();
     const blob = new Blob([pdfBytes], { type: "application/pdf" });
     const link = document.createElement("a");
