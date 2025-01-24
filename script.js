@@ -186,3 +186,4 @@ window.previewCombinedPDF = async function() {
   }
 };
 
+document.getElementById("previewButton").addEventListener("click", previewCombinedPDF);
