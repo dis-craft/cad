@@ -6,7 +6,7 @@
   <link rel="stylesheet" href="style.css">
   <title>CAD TOOL</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-  <script src="script.js" defer></script>
+  <script src="script.js"></script>
 </head>
 <body>
   <header>
@@ -28,19 +28,19 @@
     <h2>Select a Set</h2>
     <div id="setSelection">
       <div class="pdf-set">
-        <input type="radio" name="set" value="set1" onchange="loadSetFiles('set1')"> ISOMETRIC PROJECTION
+        <input type="radio" name="set" value="set1" onclick="loadSetFiles('set1')"> ISOMETRIC PROJECTION
       </div>
       <div class="pdf-set">
-        <input type="radio" name="set" value="set2" onchange="loadSetFiles('set2')"> PROJECTION OF POINTS
+        <input type="radio" name="set" value="set2" onclick="loadSetFiles('set2')"> PROJECTION OF POINTS
       </div>
       <div class="pdf-set">
-        <input type="radio" name="set" value="set3" onchange="loadSetFiles('set3')"> PROJECTION OF LINES
+        <input type="radio" name="set" value="set3" onclick="loadSetFiles('set3')"> PROJECTION OF LINES
       </div>
       <div class="pdf-set">
-        <input type="radio" name="set" value="set4" onchange="loadSetFiles('set4')"> PROJECTION OF SOLIDS
+        <input type="radio" name="set" value="set4" onclick="loadSetFiles('set4')"> PROJECTION OF SOLIDS
       </div>
       <div class="pdf-set">
-        <input type="radio" name="set" value="set5" onchange="loadSetFiles('set5')"> DEVELOPMENT OF LATERAL SURFACES
+        <input type="radio" name="set" value="set5" onclick="loadSetFiles('set5')"> DEVELOPMENT OF LATERAL SURFACES
       </div>
     </div>
 
