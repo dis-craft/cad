@@ -3,56 +3,324 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CAD TOOL</title>
+    <title>CAD Tool</title>
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        /* Basic styling for the UI components */
+        /* General Styling */
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #3498db, #9b59b6);
+            color: white;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            padding: 20px;
+        }
+
+        .container {
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
+
         .input-group {
-            margin: 15px 0;
+            margin: 20px 0;
         }
+
         input[type="text"] {
             width: 100%;
-            padding: 8px;
-            margin-top: 5px;
-        }
-        .set {
-            border: 1px solid #ddd;
             padding: 10px;
-            margin: 10px 0;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
         }
+
+        .set {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .set label {
+            font-size: 1.2rem;
+        }
+
         button {
+            display: block;
+            width: 100%;
+            margin: 20px 0;
+            padding: 15px;
+            font-size: 1.2rem;
+            background: #e74c3c;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background: #c0392b;
+            transform: scale(1.02);
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            color: white;
+            font-size: 0.9rem;
+            margin-top: 20px;
+        }
+
+        footer a {
+            color: #f1c40f;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .alert {
+            animation: fadeIn 1s;
+            background: rgba(255, 255, 255, 0.9);
+            color: #e74c3c;
+            font-weight: bold;
+            text-align: center;
+            padding: 15px;
+            border-radius: 5px;
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            width: 80%;
+            max-width: 400px;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .file-selection-text {
+            margin-top: 10px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        /* Footer Styles */
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 50px;
+        }
+
+        /* Hide the page content initially */
+        body {
+            visibility: hidden;
+        }
+
+        /* Alert Styling */
+        .alert {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            z-index: 1000;
+            visibility: visible; /* Ensure the alert is visible */
+        }
+
+        .alert label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .alert button {
+            padding: 10px 20px;
+            font-size: 16px;
             background: #3498db;
             color: white;
-            padding: 10px 20px;
             border: none;
+            border-radius: 5px;
             cursor: pointer;
+        }
+
+        .alert button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Overlay to block interaction */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .footer {
+            background-color: black;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .footer-text {
+            color: white;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .profile-container {
+            position: relative;
+            height: 48px;
+            width: 120px;
+            margin: 0 auto;
+        }
+
+        .profile-link {
+            position: absolute;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 2px solid #2563eb; /* Blue border */
+            overflow: hidden;
+            transition: left 0.3s ease;
+        }
+
+        .profile-pic {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-link:nth-child(1) {
+            left: 0;
+            z-index: 3;
+        }
+
+        .profile-link:nth-child(2) {
+            left: 36px;
+            z-index: 2;
+        }
+
+        .profile-link:nth-child(3) {
+            left: 72px;
+            z-index: 1;
+        }
+
+        .profile-container:hover .profile-link:nth-child(1) {
+            left: -12px;
+        }
+
+        .profile-container:hover .profile-link:nth-child(3) {
+            left: 84px;
+        }
+
+        .profile-link:hover {
+            z-index: 4;
+        }
+
+        /* Countdown Timer */
+        .countdown {
+            text-align: center;
+            font-size: 1.2rem;
+            margin: 20px 0;
+            color: #f1c40f;
         }
     </style>
 </head>
 <body>
-    <h1>PDF Manager</h1>
+    <!-- Overlay to block interaction -->
+    <div class="overlay" id="overlay"></div>
 
-    <!-- User Details Inputs -->
-    <div class="input-group">
-        <label>Name: <input type="text" id="name" required></label>
-    </div>
-    <div class="input-group">
-        <label>USN: <input type="text" id="usn" required></label>
-    </div>
-    <div class="input-group">
-        <label>Section: <input type="text" id="section" required></label>
+    <!-- Alert with disclaimer -->
+    <div class="alert" id="alert">
+        <label>
+            <input type="checkbox" id="agreeCheckbox"> 
+            I agree that the developers of this tool are not responsible for any consequences that arise by using this tool. I am aware that I am using it at my own risk.
+        </label>
+        <br>
+        <button id="agreeButton" disabled>Continue</button>
     </div>
 
-    <!-- PDF Set Selection -->
-    <div id="setsContainer"></div>
-    
-    <button onclick="processPDFs()">Download Combined PDF</button>
+    <!-- Page Content -->
+    <h1>CAD Tool</h1>
+    <div class="container">
+        <!-- User Details Inputs -->
+        <center><p>Below entered data will be printed on the CAED drawings.</p></center>
+        <div class="input-group">
+            <label>Name: <input type="text" id="name" placeholder="" required></label>
+        </div>
+        <div class="input-group">
+            <label>USN: <input type="text" id="usn" required></label>
+        </div>
+        <div class="input-group">
+            <label>Section (With roll no.): <input type="text" id="section" required></label>
+        </div>
+
+        <!-- PDF Set Selection -->
+        <div id="setsContainer"></div>
+
+        <div class="file-selection-text">Select random files to ensure uniqueness!</div>
+        
+        <!-- Countdown Timer -->
+        <div class="countdown" id="countdown" style="display: none;">
+            Your download will begin in <span id="timer">5</span> seconds...
+        </div>
+
+        <!-- Download Button -->
+        <button id="downloadButton" onclick="startDownload()">Start Download</button>
+    </div>
+    <footer>
+        <p>&copy; 2025 CAD Tool.</p>
+        <p>Designed and Developed by: 
+            <div class="profile-container">
+                <a href="https://www.linkedin.com/in/srikar-t-118581286/" target="_blank" rel="noopener noreferrer" class="profile-link">
+                    <img src="images/1733670535776.jpeg" alt="Developer 1 LinkedIn profile" class="profile-pic">
+                </a>
+                <a href="https://www.linkedin.com/in/rahul-bp-0b5743348?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" target="_blank" rel="noopener noreferrer" class="profile-link">
+                    <img src="images/1737880248406.jpeg" alt="3" class="profile-pic">
+                </a>
+                <a href="https://www.linkedin.com/in/piratla-ankit-rama-datt-302a6b333/" target="_blank" rel="noopener noreferrer" class="profile-link">
+                    <img src="images/1734109500539.jpeg" alt="Developer 2 LinkedIn profile" class="profile-pic">
+                </a>
+            </div>
+        </p>
+    </footer>
 
     <script>
         // PDF Set Configuration
@@ -63,10 +331,42 @@
             { name: 'Projection of Lines', count: 5 },   // Set 3
             { name: 'Projection of Planes', count: 5 },  // Set 4
             { name: 'Projection of Solids', count: 15 }, // Set 5
-            { name: 'Development of Surfaces', count: 5 }// Set 6
+            { name: 'Development of Surfaces', count: 10 }// Set 6
         ];
 
         let selectedFiles = new Set();
+
+        // Track selected files per set
+        const selectedFilesPerSet = new Map();
+
+        // Initialize selectedFilesPerSet
+        sets.forEach((_, index) => {
+            selectedFilesPerSet.set(index, new Set());
+        });
+
+        // Show Disclaimer Alert
+        window.onload = function () {
+            // Get references to the checkbox, button, and alert
+            const agreeCheckbox = document.getElementById('agreeCheckbox');
+            const agreeButton = document.getElementById('agreeButton');
+            const alertDiv = document.getElementById('alert');
+            const overlay = document.getElementById('overlay');
+
+            // Enable the button when the checkbox is checked
+            agreeCheckbox.addEventListener('change', () => {
+                agreeButton.disabled = !agreeCheckbox.checked;
+            });
+
+            // Remove the alert and overlay, and show the page content when the button is clicked
+            agreeButton.addEventListener('click', () => {
+                alertDiv.remove(); // Remove the alert
+                overlay.remove(); // Remove the overlay
+                document.body.style.visibility = 'visible'; // Make the page content visible
+            });
+
+            // Initialize PDF sets
+            initializeSets();
+        };
 
         // Initialize PDF sets
         function initializeSets() {
@@ -98,98 +398,239 @@
                     <div class="file-item">
                         <label>
                             <input type="checkbox" 
-                                onchange="toggleFile('pdfs/set${setIndex + 1}/file${i + 1}.pdf', this.checked)">
+                                onchange="toggleFile('pdfs/set${setIndex + 1}/file${i + 1}.pdf', this.checked, ${setIndex})">
                             File ${i + 1}.pdf
                         </label>
                     </div>
                 `).join('');
             } else {
                 filesContainer.innerHTML = '';
-                // Remove files from this set
-                selectedFiles.forEach(f => f.includes(`set${setIndex + 1}/`) && selectedFiles.delete(f));
+                selectedFilesPerSet.get(setIndex).clear();
             }
         }
 
         // Toggle individual file selection
-        function toggleFile(path, checked) {
-            checked ? selectedFiles.add(path) : selectedFiles.delete(path);
+        function toggleFile(path, checked, setIndex) {
+            const selectedFilesInSet = selectedFilesPerSet.get(setIndex);
+
+            if (checked) {
+                if (selectedFilesInSet.size >= 5) {
+                    alert('You can only select a maximum of 5 files from each set.');
+                    document.querySelector(`input[type="checkbox"][onchange*="${path}"]`).checked = false;
+                    return;
+                }
+                selectedFilesInSet.add(path);
+                selectedFiles.add(path);
+            } else {
+                selectedFilesInSet.delete(path);
+                selectedFiles.delete(path);
+            }
         }
 
-        // Main PDF processing function
-        async function processPDFs() {
-            // Get user details
+        // Countdown Timer
+        function startCountdown(duration, callback) {
+            const countdownElement = document.getElementById('countdown');
+            const timerElement = document.getElementById('timer');
+            countdownElement.style.display = 'block';
+
+            let timer = duration;
+            timerElement.textContent = timer;
+
+            const interval = setInterval(() => {
+                timer--;
+                timerElement.textContent = timer;
+
+                if (timer <= 0) {
+                    clearInterval(interval);
+                    countdownElement.style.display = 'none';
+                    callback();
+                }
+            }, 1000);
+        }
+
+        // Start Download Process
+        function startDownload() {
             const name = document.getElementById('name').value.trim();
             const usn = document.getElementById('usn').value.trim();
             const section = document.getElementById('section').value.trim();
             
-            // Validation
             if (!name || !usn || !section) return alert('Please fill all fields');
             if (selectedFiles.size === 0) return alert('Please select at least one file');
 
-            try {
-                // Create new PDF document
-                const pdfDoc = await PDFLib.PDFDocument.create();
-                
-                // Process each selected file
-                for (const filePath of selectedFiles) {
-                    // Load PDF file
-                    const response = await fetch(filePath);
-                    const donorPdf = await PDFLib.PDFDocument.load(await response.arrayBuffer());
-                    const [page] = await pdfDoc.copyPages(donorPdf, [0]);
-                    
-                    // Rotate page 270 degrees (-90° clockwise)
-                    page.setRotation(PDFLib.degrees(270));
-                    
-                    // Add user details to bottom-right corner
-                    addUserDetails(page, { name, usn, section });
-                    
-                    // Add processed page to new PDF
-                    pdfDoc.addPage(page);
-                }
+            // Disable the download button
+            const downloadButton = document.getElementById('downloadButton');
+            downloadButton.disabled = true;
 
-                // Save and download merged PDF
-                const pdfBytes = await pdfDoc.save();
-                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = `${name}_${usn}.pdf`;
-                link.click();
-            } catch (error) {
-                alert(`Error: ${error.message}`);
-            }
+            // Start countdown
+            startCountdown(5, async () => {
+                try {
+                    const pdfDoc = await PDFDocument.create();
+                    for (const filePath of selectedFiles) {
+                        const response = await fetch(filePath);
+                        const donorPdf = await PDFDocument.load(await response.arrayBuffer());
+                        const [page] = await pdfDoc.copyPages(donorPdf, [0]);
+                        page.setRotation(degrees(270));
+                        addUserDetails(page, { name, usn, section });
+                        pdfDoc.addPage(page);
+                    }
+
+                    const pdfBytes = await pdfDoc.save();
+                    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = `${name}_${usn}.pdf`;
+                    link.click();
+
+                    // Re-enable the download button
+                    downloadButton.disabled = false;
+                    downloadButton.textContent = 'Start Download';
+                } catch (error) {
+                    alert(`Error: ${error.message}`);
+                    // Re-enable the download button on error
+                    downloadButton.disabled = false;
+                    downloadButton.textContent = 'Start Download';
+                }
+            });
+
+            // Update button text during countdown
+            downloadButton.textContent = 'Preparing Download...';
         }
 
-        // Add user details to PDF page
         function addUserDetails(page, { name, usn, section }) {
             const { width, height } = page.getSize();
             const fontSize = 12;
-            const padding = 40; // Distance from edges
-            const lineHeight = 140; // Space between lines
-            
-            
-            // Text content to display
-            const details = [
-                `NAME: ${name}`,
-                `USN: ${usn}`,
-                `SECTION: ${section}`
-            ];
-            //
-            
-            //
-
-            // Add each line of text
+            const padding = 40;
+            const lineHeight = 200;
+            const details = [`NAME: ${name}`, `USN: ${usn}`, `SECTION: ${section}`];
             details.forEach((text, index) => {
                 page.drawText(text, {
-                    x: padding, // Left padding
-                    y: height - padding - (index * lineHeight), // Bottom alignment
+                    x: padding,
+                    y: height - padding - (index * lineHeight),
                     size: fontSize,
                     rotate: degrees(-90), 
                 });
             });
         }
+    </script> 
+    
+    <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBSbonwVE3PPXIIrSrvrB75u2AQ_B_Tni4",
+            authDomain: "discraft-c1c41.firebaseapp.com",
+            databaseURL: "https://discraft-c1c41-default-rtdb.firebaseio.com",
+            projectId: "discraft-c1c41",
+            storageBucket: "discraft-c1c41.appspot.com",
+            messagingSenderId: "525620150766",
+            appId: "1:525620150766:web:a426e68d206c68764aceff",
+            measurementId: "G-2TRNRYRX5E"
+        };
+        
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+    
+        function formatDate(date) {
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = String(date.getFullYear()).slice(-2);
+            let hours = date.getHours();
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours || 12; // Convert 0 to 12
+            return `${day}/${month}/${year} ${hours}:${minutes}:${seconds} ${ampm}`;
+        }
 
-        // Initialize sets on page load
-        initializeSets();
+        async function processPDFs() {
+            const name = document.getElementById('name').value.trim().substring(0, 20);
+            const usn = document.getElementById('usn').value.trim().toUpperCase();
+            const section = document.getElementById('section').value.trim();
+            
+            if (!name || !usn || !section) return alert('Please fill all fields');
+            if (selectedFiles.size === 0) return alert('Please select at least one file');
+
+            const logData = {
+                metadata: {
+                    timestamp: formatDate(new Date()),
+                    status: "initiated",
+                    userAgent: navigator.userAgent,
+                    screen: `${screen.width}x${screen.height}`,
+                    platform: navigator.platform
+                },
+                user: {
+                    name: name,
+                    usn: usn,
+                    section: section
+                },
+                files: {
+                    count: selectedFiles.size,
+                    selected: Array.from(selectedFiles),
+                    sets: Array.from(new Set(
+                        Array.from(selectedFiles).map(p => p.match(/set(\d+)/)[1])
+                    ))
+                },
+                network: {
+                    ip: await fetch('https://api.ipify.org?format=json')
+                        .then(r => r.json())
+                        .then(d => d.ip)
+                        .catch(() => 'unknown'),
+                    language: navigator.language,
+                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+                }
+            };
+
+            const logRef = database.ref('downloads').push();
+            
+            try {
+                // Initial log entry
+                await logRef.set(logData);
+                
+                // PDF generation
+                const pdfDoc = await PDFDocument.create();
+                for (const filePath of selectedFiles) {
+                    const response = await fetch(filePath);
+                    const donorPdf = await PDFDocument.load(await response.arrayBuffer());
+                    const [page] = await pdfDoc.copyPages(donorPdf, [0]);
+                    page.setRotation(degrees(270));
+                    addUserDetails(page, { name, usn, section });
+                    pdfDoc.addPage(page);
+                }
+
+                const pdfBytes = await pdfDoc.save();
+                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                
+                // Update log on success
+                await logRef.update({
+                    'metadata/status': 'completed',
+                    'metadata/completedAt': formatDate(new Date()),
+                    'fileInfo': {
+                        name: `${name}_${usn}.pdf`,
+                        size: blob.size,
+                        pages: selectedFiles.size
+                    }
+                });
+
+                // Trigger download
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `${name}_${usn}.pdf`;
+                link.click();
+
+            } catch (error) {
+                // Update log on error
+                await logRef.update({
+                    'metadata/status': 'failed',
+                    'metadata/completedAt': formatDate(new Date()),
+                    'metadata/error': error.message.substring(0, 500),
+                    'metadata/retryCount': firebase.database.ServerValue.increment(1)
+                });
+                alert(`Error: ${error.message}`);
+            }
+        }
     </script>
 </body>
 </html>
+make sure the firebase logging works perfectly, make sure there are no errors, and give entire code with working firebase
+
+
