@@ -127,16 +127,18 @@
             font-size: 0.9rem;
             text-align: center;
         }
+
         /* Footer Styles */
-footer {
-    background-color: #333;
-    color: white;
-    text-align: center;
-    padding: 30px 0;
-    margin-top: 50px;
-}
-/* Hide the page content initially */
-body {
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 50px;
+        }
+
+        /* Hide the page content initially */
+        body {
             visibility: hidden;
         }
 
@@ -187,7 +189,8 @@ body {
             background: rgba(0, 0, 0, 0.5);
             z-index: 999;
         }
-.footer {
+
+        .footer {
             background-color: black;
             padding: 16px;
             text-align: center;
@@ -251,9 +254,7 @@ body {
     </style>
 </head>
 <body>
-    <h1>CAD Tool</h1>
-    <div class="container">
-        <!-- Overlay to block interaction -->
+    <!-- Overlay to block interaction -->
     <div class="overlay" id="overlay"></div>
 
     <!-- Alert with disclaimer -->
@@ -267,41 +268,18 @@ body {
     </div>
 
     <!-- Page Content -->
-    <!-- <div class="container">
-        <h1>CAD Tool</h1>
-        <p>This is the main content of the page. You can only see this after agreeing to the disclaimer.</p>
-    </div> -->
-
-    <script>
-        window.onload = function () {
-            // Get references to the checkbox, button, and alert
-            const agreeCheckbox = document.getElementById('agreeCheckbox');
-            const agreeButton = document.getElementById('agreeButton');
-            const alertDiv = document.getElementById('alert');
-            const overlay = document.getElementById('overlay');
-
-            // Enable the button when the checkbox is checked
-            agreeCheckbox.addEventListener('change', () => {
-                agreeButton.disabled = !agreeCheckbox.checked;
-            });
-
-            // Remove the alert and overlay, and show the page content when the button is clicked
-            agreeButton.addEventListener('click', () => {
-                alertDiv.remove(); // Remove the alert
-                overlay.remove(); // Remove the overlay
-                document.body.style.visibility = 'visible'; // Make the page content visible
-            });
-        };
-    </script>
+    <h1>CAD Tool</h1>
+    <div class="container">
         <!-- User Details Inputs -->
+        <center><p>Below entered data will be printed on the CAED drawings.</p></center>
         <div class="input-group">
-            <label>Name: <input type="text" id="name" required></label>
+            <label>Name: <input type="text" id="name" placeholder="" required></label>
         </div>
         <div class="input-group">
             <label>USN: <input type="text" id="usn" required></label>
         </div>
         <div class="input-group">
-            <label>Section: <input type="text" id="section" required></label>
+            <label>Section (With roll no.): <input type="text" id="section" required></label>
         </div>
 
         <!-- PDF Set Selection -->
@@ -326,25 +304,8 @@ body {
                 </a>
             </div>
         </p>
-        <!-- <p>This is an open-source tool. Support our work: 
-          <a href="https://drive.google.com/file/d/1FKluRkzf_3KdJNlSSzxUK8-Ao6b0zmy_/view?usp=drive_link" target="_blank">Donate Here</a>
-        </p> -->
-      </footer>
+    </footer>
 
-      <!-- <footer class="footer">
-        <p class="footer-text">Developed By</p>
-        <div class="profile-container">
-            <a href="https://www.linkedin.com/in/profile1" target="_blank" rel="noopener noreferrer" class="profile-link">
-                <img src="https://picsum.photos/200/200?random=1" alt="Developer 1 LinkedIn profile" class="profile-pic">
-            </a>
-            <a href="https://www.linkedin.com/in/profile2" target="_blank" rel="noopener noreferrer" class="profile-link">
-                <img src="https://picsum.photos/200/200?random=2" alt="Developer 2 LinkedIn profile" class="profile-pic">
-            </a>
-            <a href="https://www.linkedin.com/in/profile3" target="_blank" rel="noopener noreferrer" class="profile-link">
-                <img src="https://picsum.photos/200/200?random=3" alt="Developer 3 LinkedIn profile" class="profile-pic">
-            </a>
-        </div>
-    </footer> -->
     <script>
         // PDF Set Configuration
         const { PDFDocument, rgb, degrees } = PDFLib;
@@ -359,36 +320,37 @@ body {
 
         let selectedFiles = new Set();
 
-        // // Show Disclaimer Alert
-        // window.onload = function () {
-        //     // Create the alert div
-        //     const alert = document.createElement('div');
-        //     alert.className = 'alert';
-        //     alert.innerHTML = `
-        //         <label>
-        //             <input type="checkbox" id="agreeCheckbox"> 
-        //             I agree that the developers of this tool are not responsible for any consequences that arise by using this tool. I am aware that I am using it at my own risk.
-        //         </label>
-        //         <br>
-        //         <button id="agreeButton" disabled>Continue</button>
-        //     `;
-        //     document.body.appendChild(alert);
+        // Track selected files per set
+        const selectedFilesPerSet = new Map();
 
-        //     // Get references to the checkbox and button
-        //     const agreeCheckbox = document.getElementById('agreeCheckbox');
-        //     const agreeButton = document.getElementById('agreeButton');
+        // Initialize selectedFilesPerSet
+        sets.forEach((_, index) => {
+            selectedFilesPerSet.set(index, new Set());
+        });
 
-        //     // Enable the button when the checkbox is checked
-        //     agreeCheckbox.addEventListener('change', () => {
-        //         agreeButton.disabled = !agreeCheckbox.checked;
-        //     });
+        // Show Disclaimer Alert
+        window.onload = function () {
+            // Get references to the checkbox, button, and alert
+            const agreeCheckbox = document.getElementById('agreeCheckbox');
+            const agreeButton = document.getElementById('agreeButton');
+            const alertDiv = document.getElementById('alert');
+            const overlay = document.getElementById('overlay');
 
-        //     // Remove the alert and overlay when the button is clicked
-        //     agreeButton.addEventListener('click', () => {
-        //         alert.remove();
-        //         document.getElementById('overlay').remove();
-        //     });
-        // };
+            // Enable the button when the checkbox is checked
+            agreeCheckbox.addEventListener('change', () => {
+                agreeButton.disabled = !agreeCheckbox.checked;
+            });
+
+            // Remove the alert and overlay, and show the page content when the button is clicked
+            agreeButton.addEventListener('click', () => {
+                alertDiv.remove(); // Remove the alert
+                overlay.remove(); // Remove the overlay
+                document.body.style.visibility = 'visible'; // Make the page content visible
+            });
+
+            // Initialize PDF sets
+            initializeSets();
+        };
 
         // Initialize PDF sets
         function initializeSets() {
@@ -420,20 +382,33 @@ body {
                     <div class="file-item">
                         <label>
                             <input type="checkbox" 
-                                onchange="toggleFile('pdfs/set${setIndex + 1}/file${i + 1}.pdf', this.checked)">
+                                onchange="toggleFile('pdfs/set${setIndex + 1}/file${i + 1}.pdf', this.checked, ${setIndex})">
                             File ${i + 1}.pdf
                         </label>
                     </div>
                 `).join('');
             } else {
                 filesContainer.innerHTML = '';
-                selectedFiles.forEach(f => f.includes(`set${setIndex + 1}/`) && selectedFiles.delete(f));
+                selectedFilesPerSet.get(setIndex).clear();
             }
         }
 
         // Toggle individual file selection
-        function toggleFile(path, checked) {
-            checked ? selectedFiles.add(path) : selectedFiles.delete(path);
+        function toggleFile(path, checked, setIndex) {
+            const selectedFilesInSet = selectedFilesPerSet.get(setIndex);
+
+            if (checked) {
+                if (selectedFilesInSet.size >= 5) {
+                    alert('You can only select a maximum of 5 files from each set.');
+                    document.querySelector(`input[type="checkbox"][onchange*="${path}"]`).checked = false;
+                    return;
+                }
+                selectedFilesInSet.add(path);
+                selectedFiles.add(path);
+            } else {
+                selectedFilesInSet.delete(path);
+                selectedFiles.delete(path);
+            }
         }
 
         // Main PDF processing function
@@ -471,7 +446,7 @@ body {
             const { width, height } = page.getSize();
             const fontSize = 12;
             const padding = 40;
-            const lineHeight = 140;
+            const lineHeight = 200;
             const details = [`NAME: ${name}`, `USN: ${usn}`, `SECTION: ${section}`];
             details.forEach((text, index) => {
                 page.drawText(text, {
@@ -482,9 +457,6 @@ body {
                 });
             });
         }
-
-        // Initialize sets on page load
-        initializeSets();
     </script>
 </body>
 </html>
