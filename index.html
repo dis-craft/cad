@@ -269,11 +269,33 @@ footer {
 
         // Show Disclaimer Alert
         window.onload = function () {
+            // Create the alert div
             const alert = document.createElement('div');
             alert.className = 'alert';
-            alert.innerText = 'We are not responsible for any consequences that arise by using this tool. Use at your own risk.';
+            alert.innerHTML = `
+                <label>
+                    <input type="checkbox" id="agreeCheckbox"> 
+                    I agree that the developers of this tool are not responsible for any consequences that arise by using this tool. I am aware that I am using it at my own risk.
+                </label>
+                <br>
+                <button id="agreeButton" disabled>Continue</button>
+            `;
             document.body.appendChild(alert);
-            setTimeout(() => alert.remove(), 10000);
+
+            // Get references to the checkbox and button
+            const agreeCheckbox = document.getElementById('agreeCheckbox');
+            const agreeButton = document.getElementById('agreeButton');
+
+            // Enable the button when the checkbox is checked
+            agreeCheckbox.addEventListener('change', () => {
+                agreeButton.disabled = !agreeCheckbox.checked;
+            });
+
+            // Remove the alert and overlay when the button is clicked
+            agreeButton.addEventListener('click', () => {
+                alert.remove();
+                document.getElementById('overlay').remove();
+            });
         };
 
         // Initialize PDF sets
