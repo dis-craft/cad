@@ -303,7 +303,7 @@
         </div>
 
         <!-- Download Button -->
-        <button id="downloadButton" onclick="startDownload()">Start Download</button>
+        <button id="downloadButton" onclick="processPDFs()">Download PDF</button>
     </div>
     <footer>
         <p>&copy; 2025 CAD Tool.</p>
@@ -495,6 +495,48 @@
             // Update button text during countdown
             downloadButton.textContent = 'Preparing Download...';
         }
+        // Main PDF processing function
+        async function processPDFs() {
+            const name = document.getElementById('name').value.trim();
+            const usn = document.getElementById('usn').value.trim();
+            const section = document.getElementById('section').value.trim();
+            
+            if (!name || !usn || !section) return alert('Please fill all fields');
+            if (selectedFiles.size === 0) return alert('Please select at least one file');
+
+            // Disable the download button
+            const downloadButton = document.getElementById('downloadButton');
+            downloadButton.disabled = true;
+
+            // Start countdown
+            startCountdown(5, async () => {
+                try {
+                    const pdfDoc = await PDFDocument.create();
+                    for (const filePath of selectedFiles) {
+                        const response = await fetch(filePath);
+                        const donorPdf = await PDFDocument.load(await response.arrayBuffer());
+                        const [page] = await pdfDoc.copyPages(donorPdf, [0]);
+                        page.setRotation(degrees(270));
+                        addUserDetails(page, { name, usn, section });
+                        pdfDoc.addPage(page);
+                    }
+
+                    const pdfBytes = await pdfDoc.save();
+                    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = `${name}_${usn}.pdf`;
+                    link.click();
+
+                    // Re-enable the download button
+                    downloadButton.disabled = false;
+                } catch (error) {
+                    alert(`Error: ${error.message}`);
+                    // Re-enable the download button on error
+                    downloadButton.disabled = false;
+                }
+            });
+        }
 
         function addUserDetails(page, { name, usn, section }) {
             const { width, height } = page.getSize();
@@ -511,8 +553,7 @@
                 });
             });
         }
-    </script> 
-    
+    </script>
     <script>
         // Initialize Firebase
         const firebaseConfig = {
