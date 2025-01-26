@@ -135,6 +135,58 @@ footer {
     padding: 30px 0;
     margin-top: 50px;
 }
+/* Hide the page content initially */
+body {
+            visibility: hidden;
+        }
+
+        /* Alert Styling */
+        .alert {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            z-index: 1000;
+            visibility: visible; /* Ensure the alert is visible */
+        }
+
+        .alert label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .alert button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .alert button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Overlay to block interaction */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
 .footer {
             background-color: black;
             padding: 16px;
@@ -201,6 +253,46 @@ footer {
 <body>
     <h1>CAD Tool</h1>
     <div class="container">
+        <!-- Overlay to block interaction -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Alert with disclaimer -->
+    <div class="alert" id="alert">
+        <label>
+            <input type="checkbox" id="agreeCheckbox"> 
+            I agree that the developers of this tool are not responsible for any consequences that arise by using this tool. I am aware that I am using it at my own risk.
+        </label>
+        <br>
+        <button id="agreeButton" disabled>Continue</button>
+    </div>
+
+    <!-- Page Content -->
+    <!-- <div class="container">
+        <h1>CAD Tool</h1>
+        <p>This is the main content of the page. You can only see this after agreeing to the disclaimer.</p>
+    </div> -->
+
+    <script>
+        window.onload = function () {
+            // Get references to the checkbox, button, and alert
+            const agreeCheckbox = document.getElementById('agreeCheckbox');
+            const agreeButton = document.getElementById('agreeButton');
+            const alertDiv = document.getElementById('alert');
+            const overlay = document.getElementById('overlay');
+
+            // Enable the button when the checkbox is checked
+            agreeCheckbox.addEventListener('change', () => {
+                agreeButton.disabled = !agreeCheckbox.checked;
+            });
+
+            // Remove the alert and overlay, and show the page content when the button is clicked
+            agreeButton.addEventListener('click', () => {
+                alertDiv.remove(); // Remove the alert
+                overlay.remove(); // Remove the overlay
+                document.body.style.visibility = 'visible'; // Make the page content visible
+            });
+        };
+    </script>
         <!-- User Details Inputs -->
         <div class="input-group">
             <label>Name: <input type="text" id="name" required></label>
@@ -217,7 +309,7 @@ footer {
 
         <div class="file-selection-text">Select random files to ensure uniqueness!</div>
         
-        <button onclick="processPDFs()">Download Combined PDF</button>
+        <button onclick="processPDFs()">Download PDF</button>
     </div>
     <footer>
         <p>&copy; 2025 CAD Tool. All rights reserved.</p>
@@ -267,36 +359,36 @@ footer {
 
         let selectedFiles = new Set();
 
-        // Show Disclaimer Alert
-        window.onload = function () {
-            // Create the alert div
-            const alert = document.createElement('div');
-            alert.className = 'alert';
-            alert.innerHTML = `
-                <label>
-                    <input type="checkbox" id="agreeCheckbox"> 
-                    I agree that the developers of this tool are not responsible for any consequences that arise by using this tool. I am aware that I am using it at my own risk.
-                </label>
-                <br>
-                <button id="agreeButton" disabled>Continue</button>
-            `;
-            document.body.appendChild(alert);
+        // // Show Disclaimer Alert
+        // window.onload = function () {
+        //     // Create the alert div
+        //     const alert = document.createElement('div');
+        //     alert.className = 'alert';
+        //     alert.innerHTML = `
+        //         <label>
+        //             <input type="checkbox" id="agreeCheckbox"> 
+        //             I agree that the developers of this tool are not responsible for any consequences that arise by using this tool. I am aware that I am using it at my own risk.
+        //         </label>
+        //         <br>
+        //         <button id="agreeButton" disabled>Continue</button>
+        //     `;
+        //     document.body.appendChild(alert);
 
-            // Get references to the checkbox and button
-            const agreeCheckbox = document.getElementById('agreeCheckbox');
-            const agreeButton = document.getElementById('agreeButton');
+        //     // Get references to the checkbox and button
+        //     const agreeCheckbox = document.getElementById('agreeCheckbox');
+        //     const agreeButton = document.getElementById('agreeButton');
 
-            // Enable the button when the checkbox is checked
-            agreeCheckbox.addEventListener('change', () => {
-                agreeButton.disabled = !agreeCheckbox.checked;
-            });
+        //     // Enable the button when the checkbox is checked
+        //     agreeCheckbox.addEventListener('change', () => {
+        //         agreeButton.disabled = !agreeCheckbox.checked;
+        //     });
 
-            // Remove the alert and overlay when the button is clicked
-            agreeButton.addEventListener('click', () => {
-                alert.remove();
-                document.getElementById('overlay').remove();
-            });
-        };
+        //     // Remove the alert and overlay when the button is clicked
+        //     agreeButton.addEventListener('click', () => {
+        //         alert.remove();
+        //         document.getElementById('overlay').remove();
+        //     });
+        // };
 
         // Initialize PDF sets
         function initializeSets() {
