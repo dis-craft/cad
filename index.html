@@ -295,6 +295,8 @@
         <!-- PDF Set Selection -->
         <div id="setsContainer"></div>
 
+
+
         <div class="file-selection-text">Select random files to ensure uniqueness!</div>
         
         <!-- Countdown Timer -->
@@ -303,7 +305,8 @@
         </div>
 
         <!-- Download Button -->
-        <button id="downloadButton" onclick="processPDFs()">Download PDF</button>
+        <!-- <button id="downloadButton" onclick="startDownload()">Download PDF</button> -->
+        <button id="downloadButton" onclick="startDownload()">Start Download</button>
     </div>
     <footer>
         <p>&copy; 2025 CAD Tool.</p>
@@ -496,7 +499,7 @@
             downloadButton.textContent = 'Preparing Download...';
         }
         // Main PDF processing function
-        async function processPDFs() {
+        async function startDownload() {
             const name = document.getElementById('name').value.trim();
             const usn = document.getElementById('usn').value.trim();
             const section = document.getElementById('section').value.trim();
@@ -583,7 +586,7 @@
             return `${day}/${month}/${year} ${hours}:${minutes}:${seconds} ${ampm}`;
         }
 
-        async function processPDFs() {
+        async function startDownload() {
             const name = document.getElementById('name').value.trim().substring(0, 20);
             const usn = document.getElementById('usn').value.trim().toUpperCase();
             const section = document.getElementById('section').value.trim();
