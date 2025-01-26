@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAD TOOL</title>
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <style>
+        /* Basic styling for the UI components */
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .input-group {
+            margin: 15px 0;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+        }
+        .set {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>PDF Manager</h1>
+
+    <!-- User Details Inputs -->
+    <div class="input-group">
+        <label>Name: <input type="text" id="name" required></label>
+    </div>
+    <div class="input-group">
+        <label>USN: <input type="text" id="usn" required></label>
+    </div>
+    <div class="input-group">
+        <label>Section: <input type="text" id="section" required></label>
+    </div>
+
+    <!-- PDF Set Selection -->
+    <div id="setsContainer"></div>
+    
+    <button onclick="processPDFs()">Download Combined PDF</button>
+
+    <script>
+        // PDF Set Configuration
+        const { PDFDocument, rgb, degrees } = PDFLib;
+        const sets = [
+            { name: 'Isometric Projection', count: 15 }, // Set 1
+            { name: 'Projection of Points', count: 5 },  // Set 2
+            { name: 'Projection of Lines', count: 5 },   // Set 3
+            { name: 'Projection of Planes', count: 5 },  // Set 4
+            { name: 'Projection of Solids', count: 15 }, // Set 5
+            { name: 'Development of Surfaces', count: 5 }// Set 6
+        ];
+
+        let selectedFiles = new Set();
+
+        // Initialize PDF sets
+        function initializeSets() {
+            const container = document.getElementById('setsContainer');
+            sets.forEach((set, index) => {
+                const setDiv = document.createElement('div');
+                setDiv.className = 'set';
+                setDiv.innerHTML = `
+                    <div>
+                        <label>
+                            <input type="checkbox" onchange="toggleSet(${index})">
+                            ${set.name}
+                        </label>
+                    </div>
+                    <div id="files-${index}"></div>
+                `;
+                container.appendChild(setDiv);
+            });
+        }
+
+        // Toggle visibility of files in a set
+        function toggleSet(setIndex) {
+            const set = sets[setIndex];
+            const filesContainer = document.getElementById(`files-${setIndex}`);
+            const checkbox = filesContainer.previousElementSibling.querySelector('input');
+            
+            if (checkbox.checked) {
+                filesContainer.innerHTML = Array.from({length: set.count}, (_, i) => `
+                    <div class="file-item">
+                        <label>
+                            <input type="checkbox" 
+                                onchange="toggleFile('pdfs/set${setIndex + 1}/file${i + 1}.pdf', this.checked)">
+                            File ${i + 1}.pdf
+                        </label>
+                    </div>
+                `).join('');
+            } else {
+                filesContainer.innerHTML = '';
+                // Remove files from this set
+                selectedFiles.forEach(f => f.includes(`set${setIndex + 1}/`) && selectedFiles.delete(f));
+            }
+        }
+
+        // Toggle individual file selection
+        function toggleFile(path, checked) {
+            checked ? selectedFiles.add(path) : selectedFiles.delete(path);
+        }
+
+        // Main PDF processing function
+        async function processPDFs() {
+            // Get user details
+            const name = document.getElementById('name').value.trim();
+            const usn = document.getElementById('usn').value.trim();
+            const section = document.getElementById('section').value.trim();
+            
+            // Validation
+            if (!name || !usn || !section) return alert('Please fill all fields');
+            if (selectedFiles.size === 0) return alert('Please select at least one file');
+
+            try {
+                // Create new PDF document
+                const pdfDoc = await PDFLib.PDFDocument.create();
+                
+                // Process each selected file
+                for (const filePath of selectedFiles) {
+                    // Load PDF file
+                    const response = await fetch(filePath);
+                    const donorPdf = await PDFLib.PDFDocument.load(await response.arrayBuffer());
+                    const [page] = await pdfDoc.copyPages(donorPdf, [0]);
+                    
+                    // Rotate page 270 degrees (-90° clockwise)
+                    page.setRotation(PDFLib.degrees(270));
+                    
+                    // Add user details to bottom-right corner
+                    addUserDetails(page, { name, usn, section });
+                    
+                    // Add processed page to new PDF
+                    pdfDoc.addPage(page);
+                }
+
+                // Save and download merged PDF
+                const pdfBytes = await pdfDoc.save();
+                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `${name}_${usn}.pdf`;
+                link.click();
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+
+        // Add user details to PDF page
+        function addUserDetails(page, { name, usn, section }) {
+            const { width, height } = page.getSize();
+            const fontSize = 12;
+            const padding = 40; // Distance from edges
+            const lineHeight = 140; // Space between lines
+            
+            
+            // Text content to display
+            const details = [
+                `NAME: ${name}`,
+                `USN: ${usn}`,
+                `SECTION: ${section}`
+            ];
+            //
+            
+            //
+
+            // Add each line of text
+            details.forEach((text, index) => {
+                page.drawText(text, {
+                    x: padding, // Left padding
+                    y: height - padding - (index * lineHeight), // Bottom alignment
+                    size: fontSize,
+                    rotate: degrees(-90), 
+                });
+            });
+        }
+
+        // Initialize sets on page load
+        initializeSets();
+    </script>
+</body>
+</html>

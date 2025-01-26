@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAD Tool</title>
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <style>
+        /* General Styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #3498db, #9b59b6);
+            color: white;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .input-group {
+            margin: 20px 0;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .set {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .set label {
+            font-size: 1.2rem;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            margin: 20px 0;
+            padding: 15px;
+            font-size: 1.2rem;
+            background: #e74c3c;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background: #c0392b;
+            transform: scale(1.02);
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            color: white;
+            font-size: 0.9rem;
+            margin-top: 20px;
+        }
+
+        footer a {
+            color: #f1c40f;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .alert {
+            animation: fadeIn 1s;
+            background: rgba(255, 255, 255, 0.9);
+            color: #e74c3c;
+            font-weight: bold;
+            text-align: center;
+            padding: 15px;
+            border-radius: 5px;
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            width: 80%;
+            max-width: 400px;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .file-selection-text {
+            margin-top: 10px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        /* Footer Styles */
+footer {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 30px 0;
+    margin-top: 50px;
+}
+.footer {
+            background-color: black;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .footer-text {
+            color: white;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .profile-container {
+            position: relative;
+            height: 48px;
+            width: 120px;
+            margin: 0 auto;
+        }
+
+        .profile-link {
+            position: absolute;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 2px solid #2563eb; /* Blue border */
+            overflow: hidden;
+            transition: left 0.3s ease;
+        }
+
+        .profile-pic {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-link:nth-child(1) {
+            left: 0;
+            z-index: 3;
+        }
+
+        .profile-link:nth-child(2) {
+            left: 36px;
+            z-index: 2;
+        }
+
+        .profile-link:nth-child(3) {
+            left: 72px;
+            z-index: 1;
+        }
+
+        .profile-container:hover .profile-link:nth-child(1) {
+            left: -12px;
+        }
+
+        .profile-container:hover .profile-link:nth-child(3) {
+            left: 84px;
+        }
+
+        .profile-link:hover {
+            z-index: 4;
+        }
+    </style>
+</head>
+<body>
+    <h1>CAD Tool</h1>
+    <div class="container">
+        <!-- User Details Inputs -->
+        <div class="input-group">
+            <label>Name: <input type="text" id="name" required></label>
+        </div>
+        <div class="input-group">
+            <label>USN: <input type="text" id="usn" required></label>
+        </div>
+        <div class="input-group">
+            <label>Section: <input type="text" id="section" required></label>
+        </div>
+
+        <!-- PDF Set Selection -->
+        <div id="setsContainer"></div>
+
+        <div class="file-selection-text">Select random files to ensure uniqueness!</div>
+        
+        <button onclick="processPDFs()">Download Combined PDF</button>
+    </div>
+    <footer>
+        <p>&copy; 2025 CAD Tool. All rights reserved.</p>
+        <p>Designed and Developed by: 
+            <div class="profile-container">
+                <a href="https://www.linkedin.com/in/srikar-t-118581286/" target="_blank" rel="noopener noreferrer" class="profile-link">
+                    <img src="images/1733670535776.jpeg" alt="Developer 1 LinkedIn profile" class="profile-pic">
+                </a>
+                <a href="https://www.linkedin.com/in/piratla-ankit-rama-datt-302a6b333/" target="_blank" rel="noopener noreferrer" class="profile-link">
+                    <img src="images/1734109500539.jpeg" alt="Developer 2 LinkedIn profile" class="profile-pic">
+                </a>
+                <a href="https://www.linkedin.com/in/rahul-bp-0b5743348?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" target="_blank" rel="noopener noreferrer" class="profile-link">
+                    <img src="" alt="3" class="profile-pic">
+                </a>
+            </div>
+        </p>
+        <p>This is an open-source tool. Support our work: 
+          <a href="https://drive.google.com/file/d/1FKluRkzf_3KdJNlSSzxUK8-Ao6b0zmy_/view?usp=drive_link" target="_blank">Donate Here</a>
+        </p>
+      </footer>
+
+      <!-- <footer class="footer">
+        <p class="footer-text">Developed By</p>
+        <div class="profile-container">
+            <a href="https://www.linkedin.com/in/profile1" target="_blank" rel="noopener noreferrer" class="profile-link">
+                <img src="https://picsum.photos/200/200?random=1" alt="Developer 1 LinkedIn profile" class="profile-pic">
+            </a>
+            <a href="https://www.linkedin.com/in/profile2" target="_blank" rel="noopener noreferrer" class="profile-link">
+                <img src="https://picsum.photos/200/200?random=2" alt="Developer 2 LinkedIn profile" class="profile-pic">
+            </a>
+            <a href="https://www.linkedin.com/in/profile3" target="_blank" rel="noopener noreferrer" class="profile-link">
+                <img src="https://picsum.photos/200/200?random=3" alt="Developer 3 LinkedIn profile" class="profile-pic">
+            </a>
+        </div>
+    </footer> -->
+    <script>
+        // PDF Set Configuration
+        const { PDFDocument, rgb, degrees } = PDFLib;
+        const sets = [
+            { name: 'Isometric Projection', count: 15 }, // Set 1
+            { name: 'Projection of Points', count: 5 },  // Set 2
+            { name: 'Projection of Lines', count: 5 },   // Set 3
+            { name: 'Projection of Planes', count: 5 },  // Set 4
+            { name: 'Projection of Solids', count: 15 }, // Set 5
+            { name: 'Development of Surfaces', count: 5 }// Set 6
+        ];
+
+        let selectedFiles = new Set();
+
+        // Show Disclaimer Alert
+        window.onload = function () {
+            const alert = document.createElement('div');
+            alert.className = 'alert';
+            alert.innerText = 'We are not responsible for any consequences that arise by using this tool.';
+            document.body.appendChild(alert);
+            setTimeout(() => alert.remove(), 5000);
+        };
+
+        // Initialize PDF sets
+        function initializeSets() {
+            const container = document.getElementById('setsContainer');
+            sets.forEach((set, index) => {
+                const setDiv = document.createElement('div');
+                setDiv.className = 'set';
+                setDiv.innerHTML = `
+                    <div>
+                        <label>
+                            <input type="checkbox" onchange="toggleSet(${index})">
+                            ${set.name}
+                        </label>
+                    </div>
+                    <div id="files-${index}"></div>
+                `;
+                container.appendChild(setDiv);
+            });
+        }
+
+        // Toggle visibility of files in a set
+        function toggleSet(setIndex) {
+            const set = sets[setIndex];
+            const filesContainer = document.getElementById(`files-${setIndex}`);
+            const checkbox = filesContainer.previousElementSibling.querySelector('input');
+            
+            if (checkbox.checked) {
+                filesContainer.innerHTML = Array.from({length: set.count}, (_, i) => `
+                    <div class="file-item">
+                        <label>
+                            <input type="checkbox" 
+                                onchange="toggleFile('pdfs/set${setIndex + 1}/file${i + 1}.pdf', this.checked)">
+                            File ${i + 1}.pdf
+                        </label>
+                    </div>
+                `).join('');
+            } else {
+                filesContainer.innerHTML = '';
+                selectedFiles.forEach(f => f.includes(`set${setIndex + 1}/`) && selectedFiles.delete(f));
+            }
+        }
+
+        // Toggle individual file selection
+        function toggleFile(path, checked) {
+            checked ? selectedFiles.add(path) : selectedFiles.delete(path);
+        }
+
+        // Main PDF processing function
+        async function processPDFs() {
+            const name = document.getElementById('name').value.trim();
+            const usn = document.getElementById('usn').value.trim();
+            const section = document.getElementById('section').value.trim();
+            
+            if (!name || !usn || !section) return alert('Please fill all fields');
+            if (selectedFiles.size === 0) return alert('Please select at least one file');
+
+            try {
+                const pdfDoc = await PDFDocument.create();
+                for (const filePath of selectedFiles) {
+                    const response = await fetch(filePath);
+                    const donorPdf = await PDFDocument.load(await response.arrayBuffer());
+                    const [page] = await pdfDoc.copyPages(donorPdf, [0]);
+                    page.setRotation(degrees(270));
+                    addUserDetails(page, { name, usn, section });
+                    pdfDoc.addPage(page);
+                }
+
+                const pdfBytes = await pdfDoc.save();
+                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `${name}_${usn}.pdf`;
+                link.click();
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+
+        function addUserDetails(page, { name, usn, section }) {
+            const { width, height } = page.getSize();
+            const fontSize = 12;
+            const padding = 40;
+            const lineHeight = 140;
+            const details = [`NAME: ${name}`, `USN: ${usn}`, `SECTION: ${section}`];
+            details.forEach((text, index) => {
+                page.drawText(text, {
+                    x: padding,
+                    y: height - padding - (index * lineHeight),
+                    size: fontSize,
+                    rotate: degrees(-90), 
+                });
+            });
+        }
+
+        // Initialize sets on page load
+        initializeSets();
+    </script>
+</body>
+</html>
