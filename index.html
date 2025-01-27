@@ -621,31 +621,86 @@
             return `${day}/${month}/${year} ${hours}:${minutes}:${seconds} ${ampm}`;
         }
     </script>
-    <script>
-        // Add this after your formatDate function
-function sendToGoogleSheets(data) {
-  const webAppUrl = 'https://script.google.com/macros/s/AKfycbzYy_7PlK42BXhiw_CySCiVdr9-4MSViOZNAZnUcGc-s--5aAA7CAu5sMdYvYZZRbE_/exec';
+<script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBSbonwVE3PPXIIrSrvrB75u2AQ_B_Tni4",
+      authDomain: "discraft-c1c41.firebaseapp.com",
+      databaseURL: "https://discraft-c1c41-default-rtdb.firebaseio.com",
+      projectId: "discraft-c1c41",
+      storageBucket: "discraft-c1c41.appspot.com",
+      messagingSenderId: "525620150766",
+      appId: "1:525620150766:web:a426e68d206c68764aceff",
+      measurementId: "G-2TRNRYRX5E"
+    };
+    
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
   
-  fetch(webAppUrl, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data)
-  });
-}
-
-// Listen for database changes
-const dbRef = database.ref('/downloads'); // Set your Firebase data path
-dbRef.on('child_added', (snapshot) => {
-  const data = snapshot.val();
-  sendToGoogleSheets({
-    user: data.user,
-    content: data.content
-    // Add other fields as needed
-  });
-});
-    </script>
+    // Web App URL with secret key
+    const webAppUrl = 'https://script.google.com/macros/s/AKfycbzYy_7PlK42BXhiw_CySCiVdr9-4MSViOZNAZnUcGc-s--5aAA7CAu5sMdYvYZZRbE_/exec?secret=YOUR_SECRET_KEY';
+  
+    // Function to send data to Google Sheets
+    function sendToGoogleSheets(data) {
+      fetch(webAppUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      }).catch(error => console.error('Error:', error));
+    }
+  
+    // Process existing data and new entries
+    function initializeDataSync() {
+      const dbRef = database.ref('/simulation/display-in');
+      const processedIds = new Set();
+  
+      // Handle existing data
+      dbRef.once('value').then(snapshot => {
+        snapshot.forEach(childSnapshot => {
+          const data = childSnapshot.val();
+          const uniqueId = data.module?.directory;
+          if (uniqueId && !processedIds.has(uniqueId)) {
+            sendToGoogleSheets(formatData(data));
+            processedIds.add(uniqueId);
+          }
+        });
+      });
+  
+      // Listen for new data
+      dbRef.on('child_added', snapshot => {
+        const data = snapshot.val();
+        const uniqueId = data.module?.directory;
+        if (uniqueId && !processedIds.has(uniqueId)) {
+          sendToGoogleSheets(formatData(data));
+          processedIds.add(uniqueId);
+        }
+      });
+    }
+  
+    // Format data for Google Sheets
+    function formatData(data) {
+      return {
+        timestamp: new Date().toISOString(),
+        include: {
+          name: data.include?.name || '',
+          user: data.include?.user || ''
+        },
+        file: {
+          name: data.file?.name || '',
+          user: data.file?.user || ''
+        },
+        module: {
+          platform: data.module?.platform || '',
+          server: data.module?.server || '',
+          client: data.module?.client || '',
+          directory: data.module?.directory || ''
+        }
+      };
+    }
+  
+    // Start the synchronization
+    initializeDataSync();
+  </script>
 </body>
 </html>
