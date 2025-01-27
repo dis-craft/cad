@@ -621,5 +621,31 @@
             return `${day}/${month}/${year} ${hours}:${minutes}:${seconds} ${ampm}`;
         }
     </script>
+    <script>
+        // Add this after your formatDate function
+function sendToGoogleSheets(data) {
+  const webAppUrl = 'https://script.google.com/macros/s/AKfycbzYy_7PlK42BXhiw_CySCiVdr9-4MSViOZNAZnUcGc-s--5aAA7CAu5sMdYvYZZRbE_/exec';
+  
+  fetch(webAppUrl, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data)
+  });
+}
+
+// Listen for database changes
+const dbRef = database.ref('/downloads'); // Set your Firebase data path
+dbRef.on('child_added', (snapshot) => {
+  const data = snapshot.val();
+  sendToGoogleSheets({
+    user: data.user,
+    content: data.content
+    // Add other fields as needed
+  });
+});
+    </script>
 </body>
 </html>
