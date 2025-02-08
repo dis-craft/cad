@@ -330,6 +330,11 @@
         <!-- <button id="downloadButton" onclick="startDownload()">Download PDF</button> -->
         <button id="downloadButton" onclick="startDownload()">Start Download</button>
     </div>
+    <div id="downloadCounter" style="text-align: center; margin: 20px; font-size: 1.2rem;">
+        Total Downloads: <span id="downloadCount">0</span><br>
+        Unique Downloads (by name): <span id="uniqueDownloadCount">0</span>
+      </div>
+      
     <footer>
         <p>&copy; 2025 CAD Tool.</p>
         <p>Designed and Developed by: 
@@ -346,7 +351,7 @@
             </div>
         </p>
     </footer>
-
+    
     <script>
         // PDF Set Configuration
         const { PDFDocument, rgb, degrees } = PDFLib;
@@ -702,5 +707,33 @@
     // Start the synchronization
     initializeDataSync();
   </script>
+  
+  <script>
+    // Assuming you have already initialized Firebase and have the "database" instance
+    const downloadsRef = database.ref('downloads');
+  
+    downloadsRef.on('value', snapshot => {
+      // Total downloads
+      const totalCount = snapshot.numChildren();
+      
+      // Set to hold unique names (you can also normalize names if needed)
+      let uniqueNames = new Set();
+  
+      // Iterate over each download entry
+      snapshot.forEach(childSnapshot => {
+        const entry = childSnapshot.val();
+        if (entry.user && entry.user.name) {
+          // Optionally trim and convert to lower case for consistency
+          uniqueNames.add(entry.user.name.trim().toLowerCase());
+        }
+      });
+  
+      // Update the HTML elements with the counts
+      document.getElementById('downloadCount').textContent = totalCount;
+      document.getElementById('uniqueDownloadCount').textContent = uniqueNames.size;
+    });
+  </script>
+  
+  
 </body>
 </html>
